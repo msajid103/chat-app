@@ -1,0 +1,52 @@
+<!-- login_signup.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/login-signup.css">
+    <title>Login and Signup</title>
+</head>
+<body>
+
+    <div class="container">
+        <div class="form-container">
+            <div class="form-toggle">
+                <button onclick="toggleForm('loginForm')">Login</button>
+                <button onclick="toggleForm('signupForm')">Signup</button>
+            </div>
+
+            <form id="loginForm" class="form" method="POST" action="{{ url_for('login') }}">
+                <h2>Login</h2>
+                <label for="loginPhoneNumber">Phone Number:</label>
+                <input type="tel" id="loginPhoneNumber" name="loginPhoneNumber" required>
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" name="loginPassword" required>
+                <button type="submit">Login</button>
+            </form>
+
+            <form id="signupForm" class="form" style="display: none;" method="POST" action="{{ url_for('signup') }}">
+                <h2>Signup</h2>
+                <label for="signupName">Name:</label>
+                <input type="text" id="signupName" name="signupName" required>
+                <label for="signupPhoneNumber">Phone Number:</label>
+                <input type="tel" id="signupPhoneNumber" name="signupPhoneNumber" required>
+                <label for="signupPassword">Password:</label>
+                <input type="password" id="signupPassword" name="signupPassword" required>
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <button type="submit">Signup</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm(formId) {
+            document.getElementById('loginForm').style.display = (formId === 'loginForm') ? 'block' : 'none';
+            document.getElementById('signupForm').style.display = (formId === 'signupForm') ? 'block' : 'none';
+        }
+    </script>
+
+</body>
+</html>
