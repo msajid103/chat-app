@@ -2,15 +2,32 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/css/login-signup.css">
     <title>Login and Signup</title>
 </head>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Find the span element inside the container
+        var errorSpan = document.querySelector('.container span');
+
+        // Check if the span element exists
+        if (errorSpan) {
+            // Set a timeout to remove the content inside the span after 3 seconds
+            setTimeout(function () {
+                errorSpan.innerHTML = ''; // Remove the content inside the span
+            }, 3000); // 3000 milliseconds (3 seconds)
+        }
+    });
+</script>
+
 <body>
 
     <div class="container">
+        <span>{{error}}</span>
         <div class="form-container">
             <div class="form-toggle">
                 <button onclick="toggleForm('loginForm')">Login</button>
@@ -20,9 +37,10 @@
             <form id="loginForm" class="form" method="POST" action="{{ url_for('login') }}">
                 <h2>Login</h2>
                 <label for="loginPhoneNumber">Phone Number:</label>
-                <input type="tel" id="loginPhoneNumber" name="loginPhoneNumber" required>
+                <input type="tel" id="loginPhoneNumber" name="loginPhoneNumber" pattern="[0-9]{11}"
+                    title="Phone number must be 11 digits" required>
                 <label for="loginPassword">Password:</label>
-                <input type="password" id="loginPassword" name="loginPassword" required>
+                <input type="password" id="loginPassword" name="loginPassword" minlength="3" required>
                 <button type="submit">Login</button>
             </form>
 
@@ -31,11 +49,12 @@
                 <label for="signupName">Name:</label>
                 <input type="text" id="signupName" name="signupName" required>
                 <label for="signupPhoneNumber">Phone Number:</label>
-                <input type="tel" id="signupPhoneNumber" name="signupPhoneNumber" required>
+                <input type="tel" id="signupPhoneNumber" name="signupPhoneNumber" pattern="[0-9]{11}"
+                    title="Phone number must be 11 digits" required>
                 <label for="signupPassword">Password:</label>
-                <input type="password" id="signupPassword" name="signupPassword" required>
+                <input type="password" id="signupPassword" name="signupPassword" minlength="4" required>
                 <label for="confirmPassword">Confirm Password:</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <input type="password" id="confirmPassword" name="confirmPassword" minlength="4" required>
                 <button type="submit">Signup</button>
             </form>
         </div>
@@ -49,4 +68,5 @@
     </script>
 
 </body>
+
 </html>
