@@ -37,7 +37,8 @@ def decrypt(encrypted_message):
         index = key.index(char)
         decrypted_message += key[(index - 3) % len(key)]
     return decrypted_message
-
+with app.app_context():
+    db.create_all()
 @app.route('/')
 def index():
     return render_template('login_signup.html')
@@ -51,7 +52,9 @@ def login():
 
     if user:
         session['user_id'] = phone_number
-        return render_template('index.html', name= Person.query.get(phone_number).name)
+        users = Person.query.filter(Person.ph_no != phone_number).all()
+        # user_names = [person.name for person in users]
+        return render_template('index.html', user_names = users, name= Person.query.get(phone_number).name)
     return render_template('login_signup.html',error = 'Invalid login credentials')
 
 
@@ -93,4 +96,5 @@ def send_message():
 
 
 if __name__ == '__main__':
+    # db.create_all()
     app.run(debug=True)
