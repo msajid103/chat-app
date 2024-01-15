@@ -42,7 +42,7 @@
           <div class="row heading">
             <div class="col-sm-3 col-xs-3 heading-avatar">
               <div class="heading-avatar-icon">
-                <img src="img/man-2-512.png">
+                <img src="../static/profile.jpg">
               </div>
             </div>
             <div class="col-sm-8 col-xs-7 heading-name">
@@ -51,23 +51,14 @@
             </div>
           </div>
           <!-- Heading End -->
-          <!-- SearchBox -->
-          <div class="row searchBox">
-            <div class="col-sm-12 searchBox-inner">
-              <div class="form-group has-feedback">
-                <input id="searchText" type="text" class="form-control" name="searchText" placeholder="Search">
-                <span class="glyphicon glyphicon-search form-control-feedback"></span>
-              </div>
-            </div>
-          </div>
-          <!-- Search Box End -->
+         
           <!-- sideBar -->
           <div class="row sideBar">
             {% for user_name in user_names%}
             <div class="row sideBar-body user-row" data-name="{{ user_name.name }}" data-phone="{{ user_name.ph_no }}">
               <div class="col-sm-3 col-xs-3 sideBar-avatar">
                 <div class="avatar-icon">
-                  <img src="img/man-2-512.png">
+                  <img src="../static/user.png">
                 </div>
               </div>
               <div class="col-sm-9 col-xs-9 sideBar-main">
@@ -94,16 +85,16 @@
         <div class="row heading">
           <div class="col-sm-2 col-md-1 col-xs-3 heading-avatar">
             <div class="heading-avatar-icon">
-              <img src="img/Snapchat-204864482.jpg">
+              <img src="../static/pro.jpg_large">
             </div>
           </div>
           <div class="col-sm-8 col-xs-7 heading-name">
-            <a class="heading-name-meta">{{receiver_name}}
+            <a class="heading-name-meta">{{receiver.name}}
             </a>
           </div>
-          <div class="col-sm-1 col-xs-1  heading-dot pull-right">
+          <!-- <div class="col-sm-1 col-xs-1  heading-dot pull-right">
             <i class="fa fa-ellipsis-v fa-2x  pull-right" aria-hidden="true"></i>
-          </div>
+          </div> -->
         </div>
         <!-- Heading End -->
         <!-- Message Box -->
@@ -117,12 +108,12 @@
           </div>
           <div id="message-content">
             {% for message in messages%}
-            {% if message.sender_id == name.ph_no %}
+            {% if message['sender_id'] == name.ph_no %}
             <div class="row message-body">
               <div class="col-sm-12 message-main-sender">
                 <div class="sender">
                   <div class="message-text">
-                    {{message.content}}
+                    {{message['content']}}
                   </div>
                 </div>
               </div>
@@ -132,7 +123,7 @@
               <div class="col-sm-12 message-main-receiver">
                 <div class="receiver">
                   <div class="message-text">
-                    {{message.content}}
+                    {{message['content']}}
                   </div>
                 </div>
               </div>
@@ -146,7 +137,7 @@
         <div class="row reply">
           <div class="col-sm-9 col-xs-9 reply-main">
             <form method="POST" action="{{ url_for('message_handling') }}" id="messageForm">
-              <input type="hidden" name="phone_number" id="phone_number" value="{{ user_names[0].ph_no }}">
+              <input type="hidden" name="phone_number" id="phone_number" value="{{ receiver.ph_no }}">
               <div class="row">
                 <div class="col-sm-9 col-xs-9 col-sm-offset-2 col-xs-offset-2 reply-main">
                   <textarea class="form-control" rows="1" name="message" id="comment"></textarea>

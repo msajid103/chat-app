@@ -38,9 +38,9 @@ def decrypt(encrypted_message):
         decrypted_message += key[(index - 3) % len(key)]
     return decrypted_message
 # with app.app_context():
-#     db.create_all()
 #     db.session.query(Message).delete()
 #     db.session.commit()
+
     
 
 @app.route('/')
@@ -60,12 +60,16 @@ def login():
         users = Person.query.filter(Person.ph_no != phone_number).all()  
         messages = Message.query.filter(
         ((Message.sender_id == phone_number) & (Message.receiver_id == users[0].ph_no)) |
-        ((Message.sender_id == users[0].ph_no) & (Message.receiver_id == phone_number))).all()    
+        ((Message.sender_id == users[0].ph_no) & (Message.receiver_id == phone_number))).all()  
+        new_message = []
+        for message in messages:
+            new_message.append({'content': decrypt(message.content),
+                            'sender_id': message.sender_id})  
         return render_template('index.html',
             user_names = users, 
-            receiver_name = users[0].name,  
+            receiver = users[0],  
             name= Person.query.get(phone_number),
-            messages = messages)
+            messages = new_message)
     return render_template('login_signup.html',error = 'Invalid login credentials')
 
 
@@ -95,17 +99,24 @@ def message_handling():
     receiver_phno = request.form.get('phone_number')
     encrypted = encrypt(message) 
     if message != "" and message != " ":
-        new_message = Message(content=encrypted, sender_id= str(phn) , receiver_id=receiver_phno)
+        print(receiver_phno)
+
+        new_message = Message(content= encrypted, sender_id= str(phn) , receiver_id=receiver_phno)
         db.session.add(new_message)
         db.session.commit()
     messages = Message.query.filter(
     ((Message.sender_id == phn) & (Message.receiver_id == receiver_phno)) |
     ((Message.sender_id == receiver_phno) & (Message.receiver_id == phn)))
+    new_message = []
+    for message in messages:
+        new_message.append({'content': decrypt(message.content),
+                            'sender_id': message.sender_id})
+    print(new_message)
     return render_template('index.html', 
         user_names = users, 
-        receiver_name = Person.query.get(receiver_phno).name,
+        receiver = Person.query.get(receiver_phno),
         name= Person.query.get(phn),
-        messages = messages)
+        messages = new_message)
 
 
 if __name__ == '__main__':
