@@ -213,7 +213,21 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #000;
+  margin-bottom: 5px;
 }
+
+.sideBar-name {
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+.phone-meta {
+  font-size: 14px;  /* Adjust the font size as needed */
+  color: #888;  /* Adjust the color as needed */
+}
+
 
 .sideBar-time {
   padding: 10px !important;
@@ -262,7 +276,6 @@ body {
 }
 .newMessage-back {
   text-align: center;
-  vertical-align: baseline;
   padding: 12px 5px !important;
   display: block;
   cursor: pointer;

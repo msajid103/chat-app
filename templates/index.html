@@ -9,32 +9,95 @@
   <!-- Font Awesome File -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
- 
+
+  <!-- Custom script for user interaction -->
+  <script>
+    $(document).ready(function () {
+      $('.user-row').on('click', function () {
+        var name = $(this).data('name');
+        var phone = $(this).data('phone');
+
+        // Update the message box content
+        $('#messageBox .heading-name a').text(name);
+
+        // Remove existing message boxes
+        $('#messageBox .message-main-receiver').remove();
+        $('#messageBox .message-main-sender').remove();
+
+        // Set the phone_number value
+        $('#phone_number').val(phone);
+        $('#messageForm').submit();
+      });
+    });
+
+  </script>
 </head>
 
 <body>
-
   <div class="container app">
     <div class="row app-one">
-      <div class="col-sm-12 conversation">
+      <div class="col-sm-4 side">
+        <div class="side-one">
+          <div class="row heading">
+            <div class="col-sm-3 col-xs-3 heading-avatar">
+              <div class="heading-avatar-icon">
+                <img src="../static/profile.jpg">
+              </div>
+            </div>
+            <div class="col-sm-8 col-xs-7 heading-name">
+              <a class="heading-name-meta">{{name.name}}
+              </a>
+            </div>
+          </div>
+          <!-- Heading End -->
+         
+          <!-- sideBar -->
+          <div class="row sideBar">
+            {% for user_name in user_names%}
+            <div class="row sideBar-body user-row" data-name="{{ user_name.name }}" data-phone="{{ user_name.ph_no }}">
+              <div class="col-sm-3 col-xs-3 sideBar-avatar">
+                <div class="avatar-icon">
+                  <img src="../static/user.png">
+                </div>
+              </div>
+              <div class="col-sm-9 col-xs-9 sideBar-main">
+                <div class="row">
+                  <div class="col-sm-8 col-xs-8 sideBar-name">
+                    <span class="name-meta">{{ user_name.name }}</span>
+                    <span class="phone-meta">0{{ user_name.ph_no }}</span>
+                  </div>
+                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
+                    <span class="time-meta pull-right">18:18
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <!-- Sidebar End -->
+        </div>
+      </div>
+      <!-- Conversation Start -->
+      <div id="messageBox" class="col-sm-8 conversation">
         <!-- Heading -->
         <div class="row heading">
           <div class="col-sm-2 col-md-1 col-xs-3 heading-avatar">
             <div class="heading-avatar-icon">
-              <!-- <img src=""> -->
+              <img src="../static/pro.jpg_large">
             </div>
           </div>
           <div class="col-sm-8 col-xs-7 heading-name">
-            <a class="heading-name-meta">{{name}}
+            <a class="heading-name-meta">{{receiver.name}}
             </a>
-
           </div>
-          <div class="col-sm-1 col-xs-1  heading-dot pull-right">
+          <!-- <div class="col-sm-1 col-xs-1  heading-dot pull-right">
             <i class="fa fa-ellipsis-v fa-2x  pull-right" aria-hidden="true"></i>
-          </div>
+          </div> -->
         </div>
+        <!-- Heading End -->
+        <!-- Message Box -->
         <div class="row message" id="conversation">
           <div class="row message-previous">
             <div class="col-sm-12 previous">
@@ -43,29 +106,38 @@
               </a>
             </div>
           </div>
-          <div class="row message-body" >
-            <div class="col-sm-12 message-main-receiver">
-              <div class="receiver">
-                <div class="message-text">
-                  {{received_message}}
-                </div>                
+          <div id="message-content">
+            {% for message in messages%}
+            {% if message['sender_id'] == name.ph_no %}
+            <div class="row message-body">
+              <div class="col-sm-12 message-main-sender">
+                <div class="sender">
+                  <div class="message-text">
+                    {{message['content']}}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div class="row message-body">
-            <div class="col-sm-12 message-main-sender">
-              <div class="sender">
-                <div class="message-text">
-                  {{sended_message }}
-                </div>               
+            {% else %}
+            <div class="row message-body">
+              <div class="col-sm-12 message-main-receiver">
+                <div class="receiver">
+                  <div class="message-text">
+                    {{message['content']}}
+                  </div>
+                </div>
               </div>
             </div>
+            {% endif %}
+            {% endfor %}
           </div>
         </div>
+        <!-- Message Box End -->
+        <!-- Reply Box -->
         <div class="row reply">
           <div class="col-sm-9 col-xs-9 reply-main">
-            <form method="POST" action="{{ url_for('send_message') }}" id="commentForm">
+            <form method="POST" action="{{ url_for('message_handling') }}" id="messageForm">
+              <input type="hidden" name="phone_number" id="phone_number" value="{{ receiver.ph_no }}">
               <div class="row">
                 <div class="col-sm-9 col-xs-9 col-sm-offset-2 col-xs-offset-2 reply-main">
                   <textarea class="form-control" rows="1" name="message" id="comment"></textarea>
@@ -79,9 +151,14 @@
             </form>
           </div>
         </div>
+        <!-- Reply Box End -->
       </div>
+      <!-- Conversation End -->
     </div>
+    <!-- App One End -->
   </div>
+
+  <!-- App End -->
 </body>
 
 </html>

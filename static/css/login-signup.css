@@ -11,11 +11,20 @@ body {
 }
 
 .container {
+    text-align: center;
     width: 400px;
     background-color: #fff;
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
+}
+
+
+.container span {
+    color: red;
+    display: block; /* Ensures the text-align:center works */
+    margin: auto;   /* Center the span horizontally */
+    max-width: 50%; /* Optionally set a maximum width */
 }
 
 .form-container {

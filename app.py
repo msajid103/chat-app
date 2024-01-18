@@ -1,19 +1,26 @@
-# Import necessary modules
-from flask import Flask, render_template, request, session
-from flask_socketio import SocketIO, emit
+from flask import Flask, render_template, request
+from flask_sqlalchemy import SQLAlchemy
 import os
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  # Set a secret key for session security
-socketio = SocketIO(app)
+app.secret_key = 'dfygyrsktk'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat.db'  
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-users = [
-    {'phone_no': '1', 'password': '1', 'name': 'Sajid'},
-    {'phone_no': '2', 'password': '2', 'name': 'Sadaqat'},
-    {'phone_no': '3', 'password': '3', 'name': 'Ali Raza'},
-    {'phone_no': '4', 'password': '4', 'name': 'Bali'},
-    # Add more user entries as needed
-]
+class Person(db.Model):
+    ph_no = db.Column(db.String(11), primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    password = db.Column(db.String(50), nullable=False)
+    messages_sent = db.relationship('Message', backref='sender', lazy=True, foreign_keys='Message.sender_id')
+    messages_received = db.relationship('Message', backref='receiver', lazy=True, foreign_keys='Message.receiver_id')
+
+class Message(db.Model):   
+    id = db.Column(db.Integer, primary_key=True) 
+    content = db.Column(db.Text, nullable=False)
+    sender_id = db.Column(db.String(11), db.ForeignKey('person.ph_no'), nullable=False)
+    receiver_id = db.Column(db.String(11), db.ForeignKey('person.ph_no'), nullable=False)
+
 
 def encrypt(message):
     key = list("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789, ")
@@ -30,21 +37,41 @@ def decrypt(encrypted_message):
         index = key.index(char)
         decrypted_message += key[(index - 3) % len(key)]
     return decrypted_message
+# with app.app_context():
+#     db.session.query(Message).delete()
+#     db.session.commit()
+
+    
 
 @app.route('/')
 def index():
     return render_template('login_signup.html')
-
+users = None
+phn = None
 @app.route('/login', methods=['POST'])
 def login():
+    global users
+    global phn
     phone_number = request.form.get('loginPhoneNumber')
     password = request.form.get('loginPassword')
-    for user in users:
-        if user['phone_no'] == phone_number and user['password'] == password:
-            # Set user identifier in the session
-            session['user_id'] = phone_number
-            return render_template('index.html', name=user['name'])
-    return render_template('login_signup.html')
+    user = Person.query.filter_by(ph_no=phone_number, password=password).first()
+    if user:
+        phn = phone_number
+        users = Person.query.filter(Person.ph_no != phone_number).all()  
+        messages = Message.query.filter(
+        ((Message.sender_id == phone_number) & (Message.receiver_id == users[0].ph_no)) |
+        ((Message.sender_id == users[0].ph_no) & (Message.receiver_id == phone_number))).all()  
+        new_message = []
+        for message in messages:
+            new_message.append({'content': decrypt(message.content),
+                            'sender_id': message.sender_id})  
+        return render_template('index.html',
+            user_names = users, 
+            receiver = users[0],  
+            name= Person.query.get(phone_number),
+            messages = new_message)
+    return render_template('login_signup.html',error = 'Invalid login credentials')
+
 
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -53,18 +80,46 @@ def signup():
     password = request.form.get('signupPassword')
     confirm_password = request.form.get('confirmPassword')
     if password == confirm_password:
-        users.append({'phone_no': phone_number, 'password': password, 'name': name})
-    return render_template('login_signup.html')
+        existing_user = Person.query.filter_by(ph_no=phone_number).first()
+        if existing_user:
+            return render_template('login_signup.html', error='User with this phone number already exists.')
+        new_user = Person(ph_no=phone_number, name=name, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+        return render_template('login_signup.html')
+    return render_template('login_signup.html', error='Passwords do not match.')
 
 
-@app.route('/send_message', methods=['POST'])
-def send_message():
+
+@app.route('/message_handling', methods=['POST'])
+def message_handling():
+    global users
+    global phn    
     message = request.form.get('message')
-    encrypted = encrypt(message)
-    return render_template('index.html', sended_message = message, received_message = encrypted)
+    receiver_phno = request.form.get('phone_number')
+    encrypted = encrypt(message) 
+    if message != "" and message != " ":
+        print(receiver_phno)
 
-
+        new_message = Message(content= encrypted, sender_id= str(phn) , receiver_id=receiver_phno)
+        db.session.add(new_message)
+        db.session.commit()
+    messages = Message.query.filter(
+    ((Message.sender_id == phn) & (Message.receiver_id == receiver_phno)) |
+    ((Message.sender_id == receiver_phno) & (Message.receiver_id == phn)))
+    new_message = []
+    for message in messages:
+        new_message.append({'content': decrypt(message.content),
+                            'sender_id': message.sender_id})
+    print(new_message)
+    return render_template('index.html', 
+        user_names = users, 
+        receiver = Person.query.get(receiver_phno),
+        name= Person.query.get(phn),
+        messages = new_message)
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    # db.create_all()
+   
+    app.run(debug=True)
