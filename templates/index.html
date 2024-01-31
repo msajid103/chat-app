@@ -27,6 +27,8 @@
 
         // Set the phone_number value
         $('#phone_number').val(phone);
+        $('#comment').val('');
+        $('#messageForm button[type="submit"]').prop('disabled', true);
         $('#messageForm').submit();
       });
     });
@@ -159,6 +161,17 @@
   </div>
 
   <!-- App End -->
+  <script>
+    $(document).ready(function () {
+        // Capture Enter key press event within the textarea
+        $('#comment').keypress(function (e) {
+            if (e.which === 13 ) { 
+                e.preventDefault(); 
+                $('#messageForm').submit();
+            }
+        });
+    });
+</script>
 </body>
 
 </html>
